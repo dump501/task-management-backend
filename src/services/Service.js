@@ -64,9 +64,10 @@ class Service {
 
     async update(id, data) {
         try {
-
-            const query = `UPDATE ${this.tableName} SET ? WHERE id= ?`
-            const [result,] = await executeQuery(query, [data, id])
+            const attributes = Object.keys(data)
+            const values = attributes.map(attribute => `${attribute} = '${data[attribute]}'`)
+            const query = `UPDATE ${this.tableName} SET ${values.join(", ")} WHERE id= ?`
+            const [result,] = await executeQuery(query, [id])
             return result.affectedRows
         } catch (error) {
             console.error(error);
@@ -78,6 +79,7 @@ class Service {
 
             const query = `DELETE FROM ${this.tableName} WHERE id = ?`
             const [result,] = await executeQuery(query, [id])
+            return result.affectedRows
         } catch (error) {
             console.error(error);
         }
