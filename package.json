@@ -1,0 +1,17 @@
+{
+  "name": "task-manager-backend",
+  "version": "1.0.0",
+  "description": "task manager app for albedo system internship application",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Fritz Albin Tsafack Djiogo",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.6.0"
+  }
+}
