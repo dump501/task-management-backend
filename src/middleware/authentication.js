@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken")
 
 const isAuthenticated = (req, res, next) => {
     let bearerHeader = req.headers["authorization"];
+    if(!bearerHeader){
+        return res.status(HttpStatus.forbidden).json({error: "Unauthorized"})
+    }
 
     let token = bearerHeader.split(" ")[1];
 
@@ -18,7 +21,7 @@ const isAuthenticated = (req, res, next) => {
             if(err){
                 return res.status(HttpStatus.unauthorized).json({error: "unauthorized"})
             }
-            req.user = decoded.userId
+            req.userId = decoded.id
             next()
         }
     )
