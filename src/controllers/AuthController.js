@@ -6,6 +6,7 @@ const User = require("../models/User");
 const UserService = require("../services/UserService");
 const bcrypt = require("bcryptjs");
 const { secret, accessTokenExpiresIn } = require("../../config/auth.config");
+const { sendMail } = require("../services/EmailService");
 
 const login = async (req, res) => {
   try {
@@ -48,7 +49,7 @@ const register = async (req, res) => {
   // TODO: validate email
   try {
     let userService = new UserService();
-    const { name, email, password } = req.cookie.jwt;
+    const { name, email, password } = req.body;
 
     const result = await userService.save({
       name,
@@ -57,6 +58,11 @@ const register = async (req, res) => {
       role_id: 2,
     });
     if (result) {
+      sendMail({
+        to: email,
+        subject: "Task manager registration",
+        html: "Welcome on Task manager",
+      });
       return res.json({ message: "User registrated successfully" });
     }
     return res
