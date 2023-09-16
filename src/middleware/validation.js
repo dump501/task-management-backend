@@ -69,15 +69,7 @@ const validTaskParams = async (req, res, next) => {
 const validTaskUpdateParams = async (req, res, next) => {
     const { current_status } = req.body
 
-    const requiredFields = validateRequiredFields(
-        req.body,
-        ["title", "description", "deadline", "tag", "current_status", "assigned_to"]
-    )
-    if (requiredFields.length !== 0) {
-        return res.status(HttpStatus.badRequest).json({ requiredFields })
-    }
-
-    if (!TaskEnum.isCurrentStatusValid(current_status)) {
+    if (current_status && !TaskEnum.isCurrentStatusValid(current_status)) {
         return res.json({ error: "Invalid current_status field" })
     }
 
@@ -103,6 +95,10 @@ const validTaskCommentsParams = async (req, res, next) => {
 
 }
 
+const validUserUpdateParams = async(req, res, next) => {
+    next()
+}
+
 
 const validationMiddleware = {
     validRegisterParams,
@@ -110,7 +106,8 @@ const validationMiddleware = {
     validTaskParams,
     validTaskUpdateParams,
     validCommentParams,
-    validTaskCommentsParams
+    validTaskCommentsParams,
+    validUserUpdateParams
 }
 
 module.exports = validationMiddleware
