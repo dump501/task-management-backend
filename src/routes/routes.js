@@ -10,7 +10,7 @@ router.get("/", (req, res) => {
     res.json({message: "Server is up and running"});
 })
 
-router.use("/admin", [
+router.use("/api/v1", [
     middleWares.authenticationMiddleware.isAuthenticated
 ], adminRouter)
 

@@ -101,9 +101,20 @@ const drop = async (req, res) => {
     }
 }
 
+const show = async(req, res) => {
+    try {
+        // let taskService = new TaskService()
+        // let 
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: Message.serverError })
+    }
+}
+
 module.exports = {
     store,
     index,
     update,
-    drop
+    drop,
+    show
 }

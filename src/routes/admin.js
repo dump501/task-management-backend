@@ -1,8 +1,9 @@
 const middleWares = require("../middleware/index");
-const adminRouter = require("express").Router()
+const apiRouter = require("express").Router()
 const TaskController = require("../controllers/TaskController")
+const CommentController = require("../controllers/CommentController")
 
-adminRouter.route("/task")
+apiRouter.route("/task")
 .get(TaskController.index)
 .post(
     [
@@ -11,7 +12,7 @@ adminRouter.route("/task")
     TaskController.store
 )
 
-adminRouter.route("/task/:id")
+apiRouter.route("/task/:id")
 .delete(TaskController.drop)
 .patch(
     [
@@ -20,4 +21,21 @@ adminRouter.route("/task/:id")
     TaskController.update
 )
 
-module.exports = adminRouter
+apiRouter.route("/comment")
+.get(
+    [
+        middleWares.validationMiddleware.validTaskCommentsParams
+    ],
+    CommentController.getTaskComments
+)
+.post(
+    [
+        middleWares.validationMiddleware.validCommentParams
+    ],
+    CommentController.store
+)
+apiRouter.route("/comment/:id")
+.delete(CommentController.drop)
+
+
+module.exports = apiRouter
