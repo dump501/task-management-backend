@@ -1,5 +1,7 @@
 const { secret } = require("../../config/auth.config");
+const HttpStatus = require("../helpers/HttpStatus");
 const { log } = require("../helpers/Logger");
+const Message = require("../helpers/Message");
 const User = require("../models/User");
 const UserService = require("../services/UserService");
 var bcrypt = require("bcryptjs");
@@ -18,7 +20,7 @@ const login = async (req, res) => {
             user.fromJson(result)
             if (bcrypt.compareSync(password, user.password)) {
                 const token = jwt.sign(
-                    {id: user.id},
+                    { id: user.id },
                     secret,
                     {
                         algorithm: 'HS256',
@@ -26,10 +28,10 @@ const login = async (req, res) => {
                         expiresIn: 86400
                     }
                 )
-                res.json({ 
+                res.json({
                     user: user.serialize(),
                     accessToken: token
-                 })
+                })
             } else {
                 res.status(401).json({ error: "Incorrect password" })
             }
@@ -46,7 +48,7 @@ const register = async (req, res) => {
     try {
         let userService = new UserService();
         const { name, email, password } = req.body;
-        
+
         const result = await userService.save({
             name,
             email,
@@ -55,8 +57,10 @@ const register = async (req, res) => {
         })
         console.log("result", result);
         if (result) {
-            res.json({ message: "User registrated successfully" })
+            return res.json({ message: "User registrated successfully" })
         }
+        return res.status(HttpStatus.internalError)
+            .json({ message: Message.serverError })
     } catch (error) {
         res.status(500).json({ error })
     }
