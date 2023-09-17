@@ -156,7 +156,7 @@ const show = async (req, res) => {
 
 const getUserTasks = async (req, res) => {
   try {
-    let taskService = new TaskSercice();
+    let taskService = new TaskService();
     let result = await taskService.findByFieldWithRelations(
       "assigned_to",
       req.userId
