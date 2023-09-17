@@ -7,6 +7,7 @@ const UserService = require("../services/UserService");
 const bcrypt = require("bcryptjs");
 const { secret, accessTokenExpiresIn } = require("../../config/auth.config");
 const { sendMail } = require("../services/EmailService");
+const { renderRegisterEmail } = require("../views/email/views");
 
 const login = async (req, res) => {
   try {
@@ -61,7 +62,7 @@ const register = async (req, res) => {
       sendMail({
         to: email,
         subject: "Task manager registration",
-        html: "Welcome on Task manager",
+        html: renderRegisterEmail(name),
       });
       return res.json({ message: "User registrated successfully" });
     }

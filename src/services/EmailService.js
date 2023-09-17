@@ -11,7 +11,7 @@ const sendMail = ({ to, subject, html }) => {
   });
 
   let mailOptions = {
-    from: process.env.SMTP_USERNAME,
+    from: "Task manager team",
     to: to,
     subject: subject,
     html: html,
