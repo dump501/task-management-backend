@@ -22,7 +22,7 @@ const isAuthenticated = (req, res, next) => {
                 return res.status(HttpStatus.unauthorized).json({error: "unauthorized"})
             }
             req.userId = decoded.id
-            next()
+            return next()
         }
     )
 }

@@ -2,7 +2,8 @@ const authRouter = require("./auth");
 const middleWares = require("../middleware/index");
 
 const router = require("express").Router();
-const adminRouter = require("./admin")
+const v1Router = require("./v1")
+const v1adminRouter = require("./v1admin")
 
 router.use(authRouter)
 
@@ -12,14 +13,11 @@ router.get("/", (req, res) => {
 
 router.use("/api/v1", [
     middleWares.authenticationMiddleware.isAuthenticated
-], adminRouter)
+], v1Router)
 
-router.get("/admin", 
-[
-    middleWares.authenticationMiddleware.isAuthenticated
-],
-(req, res) => {
-    res.json({message: "logged in"});
-})
+router.use("/api/v1/admin", [
+    middleWares.authenticationMiddleware.isAuthenticated,
+    middleWares.authorizationMiddleware.isAdmin
+], v1adminRouter)
 
 module.exports = router;

@@ -5,6 +5,7 @@ class HttpStatus{
     static created = 201;
     static internalError = 500;
     static badRequest = 400;
+    static notFound = 404;
 }
 
 module.exports = HttpStatus
