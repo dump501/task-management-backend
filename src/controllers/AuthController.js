@@ -1,11 +1,11 @@
-const { secret } = require("../../config/auth.config");
+const jwt = require("jsonwebtoken");
 const HttpStatus = require("../helpers/HttpStatus");
-const { log } = require("../helpers/Logger");
 const Message = require("../helpers/Message");
+const { generateTokens, verifyRefreshToken } = require("../helpers/helper");
 const User = require("../models/User");
 const UserService = require("../services/UserService");
-var bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken")
+const bcrypt = require("bcryptjs");
+const { secret, accessTokenExpiresIn } = require("../../config/auth.config");
 
 const login = async (req, res) => {
 
@@ -19,18 +19,20 @@ const login = async (req, res) => {
             let user = new User()
             user.fromJson(result)
             if (bcrypt.compareSync(password, user.password)) {
-                const token = jwt.sign(
-                    { id: user.id },
-                    secret,
-                    {
-                        algorithm: 'HS256',
-                        allowInsecureKeySizes: true,
-                        expiresIn: 86400
-                    }
-                )
+                const { accessToken, refreshToken } = generateTokens(result)
+
+                res.cookie("jwt", refreshToken, {
+                    httpOnly: true,
+                    sameSite: 'None',
+                    secure: false,
+                    maxAge: 24 * 60 * 60 * 1000
+                })
+
                 res.json({
-                    user: user.serialize(),
-                    accessToken: token
+                    data: {
+                        user: user.serialize(),
+                        accessToken
+                    }
                 })
             } else {
                 res.status(401).json({ error: "Incorrect password" })
@@ -39,7 +41,8 @@ const login = async (req, res) => {
             res.status(404).json({ error: "User not found" })
         }
     } catch (error) {
-        res.status(500).json({ error })
+        console.log(error);
+        res.status(HttpStatus.internalError).json({ error: Message.serverError })
     }
 }
 
@@ -47,7 +50,7 @@ const register = async (req, res) => {
     // TODO: validate email
     try {
         let userService = new UserService();
-        const { name, email, password } = req.body;
+        const { name, email, password } = req.cookie.jwt;
 
         const result = await userService.save({
             name,
@@ -62,12 +65,36 @@ const register = async (req, res) => {
         return res.status(HttpStatus.internalError)
             .json({ message: Message.serverError })
     } catch (error) {
-        res.status(500).json({ error })
+        console.log(error);
+        res.status(HttpStatus.internalError).json({ error: Message.serverError })
     }
 
 }
 
+const refreshToken = async (req, res) => {
+    try {
+        const refreshToken = req.cookies.jwt;
+        const { decoded } = verifyRefreshToken(refreshToken)
+        const payload = { id: decoded?.id }
+        const accessToken = jwt.sign(
+            payload,
+            secret,
+            {
+                algorithm: 'HS256',
+                allowInsecureKeySizes: true,
+                expiresIn: accessTokenExpiresIn
+            }
+
+        )
+        res.json({ data: { accessToken } })
+    } catch (error) {
+        console.log(error);
+        res.status(HttpStatus.internalError).json({ error: Message.serverError })
+    }
+}
+
 module.exports = {
     login,
-    register
+    register,
+    refreshToken
 }

@@ -2,6 +2,7 @@ const TaskEnum = require("../enums/TaskEnum");
 const HttpStatus = require("../helpers/HttpStatus");
 const Logger = require("../helpers/Logger");
 const Message = require("../helpers/Message");
+const { verifyRefreshToken } = require("../helpers/helper");
 const UserService = require("../services/UserService");
 
 const validateRequiredFields = (body, fields) => {
@@ -99,6 +100,18 @@ const validUserUpdateParams = async(req, res, next) => {
     next()
 }
 
+const validRefreshToken = async(req, res, next) => {
+    if(req.cookies?.jwt){
+        const refreshToken = req.cookies.jwt;
+        const {error, decoded} = verifyRefreshToken(refreshToken)
+        if(!error && decoded){
+            return next()
+        }
+    }
+    
+    return res.status(HttpStatus.badRequest).json({error: "Missing cookie"})
+}
+
 
 const validationMiddleware = {
     validRegisterParams,
@@ -107,7 +120,8 @@ const validationMiddleware = {
     validTaskUpdateParams,
     validCommentParams,
     validTaskCommentsParams,
-    validUserUpdateParams
+    validUserUpdateParams,
+    validRefreshToken
 }
 
 module.exports = validationMiddleware

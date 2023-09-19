@@ -18,5 +18,13 @@ authRouter.post(
     ],
     AuthController.register
 )
+authRouter.post(
+    "/refresh-token",
+    [
+        middleWares.authenticationMiddleware.isAuthenticated,
+        middleWares.validationMiddleware.validRefreshToken
+    ],
+    AuthController.refreshToken
+)
 
 module.exports = authRouter
