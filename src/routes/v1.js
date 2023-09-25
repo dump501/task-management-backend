@@ -20,10 +20,7 @@ apiRouter
   .route("/task/:id")
   .delete([middleWares.authorizationMiddleware.isAdmin], TaskController.drop)
   .patch(
-    [
-      middleWares.validationMiddleware.validTaskUpdateParams,
-      middleWares.authorizationMiddleware.isAdmin,
-    ],
+    [middleWares.validationMiddleware.validTaskUpdateParams],
     TaskController.update
   );
 
@@ -49,12 +46,10 @@ apiRouter
     UserController.update
   );
 
-apiRouter.route("/user").get(UserController.index);
+apiRouter.route("/user").get(UserController.index).patch(UserController.update);
 
-apiRouter
-  .route("/user/:id")
-  .get(UserController.show)
-  .patch(UserController.update);
+apiRouter.route("/user/:id");
+// .get(UserController.show)
 
 apiRouter.get("/user/task", TaskController.getUserTasks);
 

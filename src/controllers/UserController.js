@@ -29,6 +29,8 @@ const update = async (req, res) => {
     if (name) data["name"] = name;
     if (name) data["profile"] = profile;
 
+    console.log(data, req.userId);
+
     const result = await userService.update(req.userId, data);
     if (result) {
       return res.json({ message: "User updated successfully" });
@@ -80,6 +82,7 @@ const adminUpdate = async (req, res) => {
     let user = await userService.findOneById(req.params.id);
     if (user) {
       const { role_id, is_active } = req.body;
+      console.log(req.body);
       const data = {
         role_id: role_id || user.role_id,
         is_active: is_active || user.is_active,
