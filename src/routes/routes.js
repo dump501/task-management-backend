@@ -27,13 +27,4 @@ router.use(
   v1adminRouter
 );
 
-router.get("/mail", (req, res) => {
-  try {
-    sendMail();
-  } catch (error) {
-    console.log(error);
-  }
-  return res.json({ message: "Email sended successfully" });
-});
-
 module.exports = router;
