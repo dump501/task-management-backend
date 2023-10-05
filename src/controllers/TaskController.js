@@ -2,8 +2,13 @@ const TaskEnum = require("../enums/TaskEnum");
 const HttpStatus = require("../helpers/HttpStatus");
 const Message = require("../helpers/Message");
 const { getCurrentDateTime } = require("../helpers/helper");
-const TaskSercice = require("../services/TaskService");
 const TaskService = require("../services/TaskService");
+const UserService = require("../services/UserService");
+const {
+  renderTaskAssignEmail,
+  renderTaskStatusEmail,
+} = require("../views/email/views");
+const { sendMail } = require("../services/EmailService");
 
 const store = async (req, res) => {
   console.log("req", req.userId);
@@ -30,8 +35,18 @@ const store = async (req, res) => {
     }
 
     const result = await taskService.save(data);
-    console.log("result", result);
     if (result) {
+      let userService = new UserService();
+
+      // send assignment email
+      if (assigned_to) {
+        let user = await userService.findOneById(assigned_to);
+        sendMail({
+          to: user.email,
+          subject: "Task assignment",
+          html: renderTaskAssignEmail(user.name, title),
+        });
+      }
       return res.json({ message: "User registrated successfully" });
     }
     return res
@@ -79,9 +94,36 @@ const update = async (req, res) => {
 
     const result = await taskService.update(req.params.id, data);
     if (result) {
+      let userService = new UserService();
+
+      // send assignment email
+      if (assigned_to) {
+        let user = await userService.findOneById(assigned_to);
+        let task = await taskService.findOneById(req.params.id);
+        sendMail({
+          to: user.email,
+          subject: "Task assignment",
+          html: renderTaskAssignEmail(user.name, task.title),
+        });
+      }
+
+      // send status email
+      if (current_status) {
+        let task = await taskService.findOneById(req.params.id);
+        let user = await userService.findOneById(task.assigned_to);
+        sendMail({
+          to: user.email,
+          subject: "Task status update",
+          html: renderTaskStatusEmail(
+            user.name,
+            task.title,
+            task.current_status
+          ),
+        });
+      }
       return res.json({ message: "User updated successfully" });
     }
-    res.status(500).json({ error: Message.serverError });
+    res.status(404).json({ error: "Task not found" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: Message.serverError });
@@ -114,7 +156,7 @@ const show = async (req, res) => {
 
 const getUserTasks = async (req, res) => {
   try {
-    let taskService = new TaskSercice();
+    let taskService = new TaskService();
     let result = await taskService.findByFieldWithRelations(
       "assigned_to",
       req.userId
