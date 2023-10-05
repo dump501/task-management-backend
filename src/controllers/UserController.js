@@ -1,6 +1,8 @@
 const HttpStatus = require("../helpers/HttpStatus");
 const Message = require("../helpers/Message");
+const { sendMail } = require("../services/EmailService");
 const UserService = require("../services/UserService");
+const { renderRoleChangedEmail } = require("../views/email/views");
 
 const profile = async (req, res) => {
   try {
@@ -82,13 +84,21 @@ const adminUpdate = async (req, res) => {
     let user = await userService.findOneById(req.params.id);
     if (user) {
       const { role_id, is_active } = req.body;
-      console.log(req.body);
       const data = {
         role_id: role_id || user.role_id,
         is_active: is_active || user.is_active,
       };
       const result = await userService.update(req.params.id, data);
       if (result) {
+        if (role_id) {
+          let role = parseInt(role_id) === 1 ? "admin" : "user";
+          let prevRole = role === "admin" ? "user" : "admin";
+          sendMail({
+            to: user.email,
+            subject: "Role update",
+            html: renderRoleChangedEmail(user.name, prevRole, role),
+          });
+        }
         return res.json({ message: "User updated successfully" });
       }
     }
